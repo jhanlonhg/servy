@@ -36,6 +36,10 @@ defmodule Servy.Handler do
     %{ conv | status: 200, resp_body: "Teddy, Smoky, Yogi" }
   end
 
+  def route(conv, "GET", "/bears/" <> id) do
+    %{ conv | status: 200, resp_body: "Bears #{id}" }
+  end
+
   def route(conv, _method, path) do
     %{ conv | status: 404, resp_body: "No #{path} found!"}
   end
@@ -88,6 +92,18 @@ IO.puts response
 
 request = """
 GET /bigfoot HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.hande(request)
+
+IO.puts response
+
+request = """
+GET /bears/1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
