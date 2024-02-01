@@ -1,12 +1,12 @@
 defmodule Servy.Handler do
   def hande(request) do
     request
-    |> parse
-    |> rewrite_path
-    |> log
-    |> route
-    |> track
-    |> format_response
+    |> parse()
+    |> rewrite_path()
+    |> log()
+    |> route()
+    |> track()
+    |> format_response()
   end
 
   def track(%{ status: 404, path: path } = conv) do
@@ -26,7 +26,7 @@ defmodule Servy.Handler do
     [method, path, _] =
       request
         |> String.split("\n")
-        |> List.first
+        |> List.first()
         |> String.split(" ")
 
     %{
@@ -43,7 +43,7 @@ defmodule Servy.Handler do
     %{ conv | status: 200, resp_body: "Bears, Lions, Tigers" }
   end
 
-def route(%{ method: "GET", path: "/bears" } = conv) do
+  def route(%{ method: "GET", path: "/bears" } = conv) do
     %{ conv | status: 200, resp_body: "Teddy, Smoky, Yogi" }
   end
 
@@ -51,9 +51,22 @@ def route(%{ method: "GET", path: "/bears" } = conv) do
     %{ conv | status: 200, resp_body: "Bears #{id}" }
   end
 
+  def route(%{ method: "GET", path: "/about" } = conv) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join("about.html")
+    |> File.read()
+    |> handle_file(conv)
+  end
+
   def route(%{ path: path } = conv) do
     %{ conv | status: 404, resp_body: "No #{path} found!"}
   end
+
+  defp handle_file({:ok, content}, conv), do: %{ conv | status: 200, resp_body: content }
+
+  defp handle_file({:error, :enoent}, conv), do: %{ conv | status: 404, resp_body: "File not found!" }
+
+  defp handle_file({:error, reason}, conv), do: %{conv | status: 500, resp_body: "File error: #{reason}"}
 
   def format_response(conv) do
     """
@@ -127,6 +140,18 @@ IO.puts response
 
 request = """
 GET /wildlife HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.hande(request)
+
+IO.puts response
+
+request = """
+GET /about HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
