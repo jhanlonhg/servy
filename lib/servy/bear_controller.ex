@@ -28,5 +28,5 @@ defmodule Servy.BearController do
 
     render(conv, "show.eex", bear: bear)
   end
-  def create(%Conv{} = conv, %{"type" => type, "name" => name}), do: %{ conv | status: 201, resp_body: "Create a #{type} bear named #{name}!"}
+  def create(%Conv{} = conv, %{"type" => type, "name" => name}), do: %{ conv | status: 201, resp_body: "Created a #{type} bear named #{name}!"}
 end
